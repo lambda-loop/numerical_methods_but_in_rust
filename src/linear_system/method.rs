@@ -1,12 +1,16 @@
 //
 
+// use crate::experiment::
 use crate::linear_system::LinearSystem;
 use std::mem;
 use std::thread;
 
 use super::checkup::classical_serial;
 
-pub fn classical_with_serial_checkup(linear_system: LinearSystem, num_threads: usize) {
+pub fn classical_with_serial_checkup(
+    linear_system: LinearSystem,
+    num_threads: usize,
+) -> (u64, Vec<f64>) {
     let mut converged = false;
     let mut iters: u64 = 0;
 
@@ -36,4 +40,6 @@ pub fn classical_with_serial_checkup(linear_system: LinearSystem, num_threads: u
         mem::swap(&mut xs, &mut buffer);
         iters += 1;
     }
+
+    (iters, xs)
 }

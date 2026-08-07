@@ -1,4 +1,5 @@
 // AI GENERATED:
+pub mod classical_with_serial_checkup;
 
 use std::time::Duration;
 
@@ -26,6 +27,7 @@ impl ProblemSolutionConfig {
 pub struct PerformanceAndQuality {
     pub num_iterations: u64,
     pub time_spent: Duration,
+    // pub final_result: Vec<f64>,
     pub final_residual: f64,
     pub converged: bool,
 }
