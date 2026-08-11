@@ -15,7 +15,7 @@ use std::{fs, io};
 pub struct LinearSystem {
     sas: SquareMatrix,
     sbs: Vec<f64>,
-    slen: usize,
+    pub slen: usize,
 }
 
 impl LinearSystem {
@@ -39,12 +39,17 @@ impl LinearSystem {
     pub unsafe fn initilize_xs(&self) -> Vec<f64> {
         let len = self.slen;
         let mut xs: Vec<f64> = Vec::with_capacity(len);
+        let spare = xs.spare_capacity_mut();
+
         unsafe {
             for i in 0..len {
                 let bi = *self.sbs.get_unchecked(i);
                 let aii = *self.sas.get_unchecked(i, i);
-                *xs.get_unchecked_mut(i) = bi / aii;
+                spare.get_unchecked_mut(i).write(bi / aii);
             }
+        }
+        unsafe {
+            xs.set_len(len);
         }
         xs
     }
@@ -75,5 +80,37 @@ impl LinearSystem {
                 *chunk.get_unchecked_mut(i - start_row) = sum / aii;
             }
         }
+    }
+
+    // ai generated
+    /// Calcula a Norma L2 (Euclidiana) do resíduo: ||b - Ax||_2
+    pub fn calculate_residual(&self, xs: &[f64]) -> f64 {
+        let len = self.slen;
+        debug_assert!(
+            xs.len() == len,
+            "O tamanho do vetor x não corresponde ao sistema"
+        );
+
+        let mut residual_norm_sq = 0.0;
+
+        for i in 0..len {
+            unsafe {
+                let mut ax_i = 0.0;
+
+                // Produto escalar da linha i da matriz A pelo vetor x
+                for j in 0..len {
+                    ax_i += *self.sas.get_unchecked(i, j) * *xs.get_unchecked(j);
+                }
+
+                // r_i = b_i - (A * x)_i
+                let r_i = *self.sbs.get_unchecked(i) - ax_i;
+
+                // Soma os quadrados dos resíduos
+                residual_norm_sq += r_i * r_i;
+            }
+        }
+
+        // Retorna a raiz quadrada da soma
+        residual_norm_sq.sqrt()
     }
 }

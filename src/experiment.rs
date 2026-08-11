@@ -1,8 +1,11 @@
 // AI GENERATED:
 pub mod classical_with_serial_checkup;
+pub mod full;
+pub mod gapped_with_serial_checkup;
 
 use std::time::Duration;
 
+#[derive(Debug)]
 pub struct ProblemSolutionConfig {
     pub len: usize,
     pub num_threads: usize,
@@ -24,6 +27,7 @@ impl ProblemSolutionConfig {
     }
 }
 
+#[derive(Debug)]
 pub struct PerformanceAndQuality {
     pub num_iterations: u64,
     pub time_spent: Duration,
@@ -46,8 +50,9 @@ impl PerformanceAndQuality {
     }
 }
 
+#[derive(Debug)]
 pub struct Metadata {
-    pub id: u8,
+    pub id: u64,
     pub algorithm_name: String,
     pub file_name: String,
 }
@@ -60,6 +65,7 @@ impl Metadata {
     }
 }
 
+#[derive(Debug)]
 pub struct ExperimentResult {
     pub metadata: Metadata,
     pub problem_solution_config: ProblemSolutionConfig,
