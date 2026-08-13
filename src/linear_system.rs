@@ -1,5 +1,6 @@
 //
 
+pub mod adjacency_list;
 pub mod checkup;
 mod matrix;
 pub mod method;
