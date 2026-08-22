@@ -2,7 +2,7 @@
 
 // use super::*;
 use crate::config;
-use crate::linear_system::method::classical_with_serial_checkup::classical_with_serial_checkup as method;
+use crate::linear_system::method::delayed_with_serial_checkup::delayed_with_serial_checkup as method;
 use crate::linear_system::LinearSystem;
 // use std::time::Duration;
 
@@ -15,6 +15,7 @@ pub fn experienting(linear_system: &LinearSystem) -> Vec<(Performance, Config)> 
     let mut results = Vec::new();
 
     for num_threads in config::TESTING_THREADS {
+        assert_ne!(num_threads, 1);
         let now = std::time::Instant::now();
         let (iters, final_xs) = method(linear_system, num_threads);
         let elapsed = now.elapsed();
@@ -30,10 +31,10 @@ pub fn experienting(linear_system: &LinearSystem) -> Vec<(Performance, Config)> 
 
         let config = Config {
             len: linear_system.slen,
-            num_threads: num_threads,
+            num_threads,
             num_threads_c: 1,
             gap: 1,
-            delayed: 1,
+            delayed: 2,
             sparsed: false,
         };
 

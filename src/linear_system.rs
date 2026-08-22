@@ -83,6 +83,50 @@ impl LinearSystem {
         }
     }
 
+    pub unsafe fn jaspiom_closure_step(
+        &self,
+        start_row: usize,
+        // end_row: usize,
+        // old_xs: &[f64],
+        line_sums: &[f64],
+        // chunk: &mut [f64],
+        xs: &mut [f64],
+    ) {
+        let xs_len = xs.len();
+        // debug_assert!(end_row <= len, "end_row > matrix len");
+        // debug_assert!(old_xs.len() == len, "wrong old_xs len");
+        // debug_assert!(chunk.len() == end_row - start_row, "wrong chunk len");
+
+        unsafe {
+            for i in 0..xs_len {
+                let gi = start_row + i; // global i
+                let aii = *self.sas.get_unchecked(gi, gi);
+                let mut sum_i = *self.sbs.get_unchecked(gi) + *line_sums.get_unchecked(i);
+                for j in 0..xs_len {
+                    sum_i -= *self.sas.get_unchecked(gi, start_row + j) * *xs.get_unchecked(j);
+                }
+
+                sum_i += aii * *xs.get_unchecked(i);
+                *xs.get_unchecked_mut(i) = sum_i / aii;
+            }
+        }
+        // for i in start_row..end_row {
+        //     unsafe {
+        //         let aii = *self.sas.get_unchecked(i, i);
+        //         let mut sum = *self.sbs.get_unchecked(i);
+        //         for j in 0..len {
+        //             sum -= *self.sas.get_unchecked(i, j) * *old_xs.get_unchecked(j);
+        //         }
+
+        //         // better than "if j != i {"
+        //         sum += aii * *old_xs.get_unchecked(i);
+
+        //         // global to local
+        //         *chunk.get_unchecked_mut(i - start_row) = sum / aii;
+        //     }
+        // }
+    }
+
     // ai generated
     /// Calcula a Norma L2 (Euclidiana) do resíduo: ||b - Ax||_2
     pub fn calculate_residual(&self, xs: &[f64]) -> f64 {

@@ -23,5 +23,6 @@ pub fn classical_serial(old_xs: &[f64], new_xs: &[f64]) -> bool {
         };
     }
 
-    highest_new_x == 0.0 || highest_diff / highest_new_x < config::EPSI
+    // highest_new_x == 0.0 || highest_diff / highest_new_x < config::EPSI
+    highest_diff / (highest_new_x + f64::EPSILON) < config::EPSI
 }
