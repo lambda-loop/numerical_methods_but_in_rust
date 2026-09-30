@@ -7,10 +7,15 @@ use experiment::classical_with_serial_checkup::experienting as exp;
 use experiment::ExperimentResult as ExpRes;
 use linear_system::LinearSystem;
 
+use classical_with_serial_checkup::classical_with_serial_checkup as jc;
 use config::OUT_PATH;
-// const matrix_name: &'static str = "dwb512";
-const matrix_name: &'static str = "orsirr_2";
-// const matrix_name: &'static str = "add32";
+use jaspiom::chaotic_jaspiom_in_place as jm;
+use linear_system::method::classical_with_serial_checkup;
+use linear_system::method::jaspiom;
+// const MATRIX_NAME: &'static str = "dwb512";
+const MATRIX_NAME: &'static str = "orsirr_2";
+// const MATRIX_NAME: &'static str = "orsirr_1";
+// const MATRIX_NAME: &'static str = "add32";
 
 pub struct MatrixInfo {
     pub name: &'static str,
@@ -35,7 +40,20 @@ impl MatrixInfo {
 fn main() {
     // let ls = LinearSystem::new("young4c");
     // let ls = LinearSystem::new("add32");
-    experiment::short::full(matrix_name);
+    // experiment::short::full(matrix_name);
+    let ls = LinearSystem::new(MATRIX_NAME);
+
+    let now = std::time::Instant::now();
+    let _ = jc(&ls, 12);
+    let elapsed = now.elapsed();
+
+    println!("jacobi {elapsed:?}");
+
+    let now = std::time::Instant::now();
+    let _ = jm(&ls, 12);
+    let elapsed = now.elapsed();
+
+    println!("new_method: {elapsed:?}");
     // let results = experiment::full::full(matrix_name);
 
     // let mut csv = String::from(ExpRes::HEADER);
