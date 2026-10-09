@@ -3,13 +3,14 @@ mod config;
 mod experiment;
 mod linear_system;
 
+use experiment::Metadata;
 use experiment::classical_with_serial_checkup::experienting as exp;
 use experiment::ExperimentResult as ExpRes;
 use linear_system::LinearSystem;
 
 use classical_with_serial_checkup::classical_with_serial_checkup as jc;
 use config::OUT_PATH;
-use jaspiom::chaotic_jaspiom_in_place as jm;
+// use jaspiom::chaotic_jaspiom_in_place as jm;
 use linear_system::method::classical_with_serial_checkup;
 use linear_system::method::jaspiom;
 // const MATRIX_NAME: &'static str = "dwb512";
@@ -37,33 +38,78 @@ impl MatrixInfo {
     }
 }
 
+use experiment::ExperimentResult;
 fn main() {
-    // let ls = LinearSystem::new("young4c");
-    // let ls = LinearSystem::new("add32");
-    // experiment::short::full(matrix_name);
-    let ls = LinearSystem::new(MATRIX_NAME);
-
-    let now = std::time::Instant::now();
-    let _ = jc(&ls, 12);
-    let elapsed = now.elapsed();
-
-    println!("jacobi {elapsed:?}");
-
-    let now = std::time::Instant::now();
-    let _ = jm(&ls, 12);
-    let elapsed = now.elapsed();
-
-    println!("new_method: {elapsed:?}");
-    // let results = experiment::full::full(matrix_name);
-
-    // let mut csv = String::from(ExpRes::HEADER);
-    // for result in results {
-    //     csv.push('\n');
-    //     csv.push_str(&result.to_csv());
+    let ms = all_matrice_names();
+    // for m in &ms {
+    //     println!("{m}");
     // }
 
-    // let out_path = format!("{}{}.csv", OUT_PATH, matrix_name);
-    // _ = std::fs::write(&out_path, csv);
+    let lss: Vec<_> = ms
+        .into_iter()
+        .map(|m| {
+            let ls = LinearSystem::new(&m);
+            (m, ls)
+        })
+        .collect();
 
-    // println!("{csv:?}");
+    let mut id = 0;
+    println!("{}", experiment::ExperimentResult::HEADER);
+    for (m, ls) in lss {
+        experiment::jaspiom::experienting(&ls)
+            .into_iter()
+            .map(|(performance, config)| {
+                let metadata = Metadata {
+                    id,
+                    algorithm_name: String::from("usual_jaspiom"), 
+                    file_name: m.clone(),
+                }; id += 1;
+
+                ExperimentResult {
+                    metadata,
+                    performance_and_quality: performance,
+                    problem_solution_config: config,
+                }.to_csv()
+            }).for_each(|line| {
+                println!("{line}");
+            });
+
+        experiment::jaspiomz::experienting(&ls)
+            .into_iter()
+            .map(|(performance, config)| {
+                let metadata = Metadata {
+                    id,
+                    algorithm_name: String::from("gapped_jaspiom"), 
+                    file_name: m.clone(),
+                }; id += 1;
+
+                ExperimentResult {
+                    metadata,
+                    performance_and_quality: performance,
+                    problem_solution_config: config,
+                }.to_csv()
+            }).for_each(|line| {
+                println!("{line}");
+            });
+    }
+}
+
+fn all_matrice_names() -> Vec<String> {
+    let dir_name = "data/as";
+    let mut dir = std::fs::read_dir(dir_name).unwrap();
+
+    let mut ms = Vec::new();
+    while let Some(Ok(entry)) = dir.next() {
+        let file_type = entry.file_type().unwrap();
+        if !file_type.is_file() { continue }
+        let m = entry
+            .file_name()
+            .to_string_lossy()
+            .to_string();
+        let (m, _) = m.split_once(".").unwrap();
+
+        ms.push(String::from(m));
+    }
+
+    ms
 }

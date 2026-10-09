@@ -153,30 +153,40 @@ impl LinearSystem {
             } }
         }
 
-        for _ in 0..num_steps {
+
+        for i in start_row..end_row {
+            unsafe {
+                let aii = *self.sas.get_unchecked(i, i);
+                let mut sum = *self.sbs.get_unchecked(i) + *tresh_hold.get_unchecked(i - start_row);
+
+                // new
+                for j in start_row..i {
+                    sum -= *self.sas.get_unchecked(i, j)
+                        * *chunk.get_unchecked(j - start_row);
+                }
+
+                // old
+                for j in (i+1)..end_row {
+                    sum -= *self.sas.get_unchecked(i, j)
+                        * *old_xs.get_unchecked(j);
+                }
+
+
+
+                // global to local
+                *chunk.get_unchecked_mut(i - start_row) = sum / aii;
+            }
+        }
+
+        for _ in 0..num_steps-1 {
             for i in start_row..end_row {
                 unsafe {
                     let aii = *self.sas.get_unchecked(i, i);
                     let mut sum = *self.sbs.get_unchecked(i) + *tresh_hold.get_unchecked(i - start_row);
-
-                    // old
-                    // for j in 0..start_row {
-                    //     sum -= *self.sas.get_unchecked(i, j)
-                    //         * *old_xs.get_unchecked(j);
-                    // }
-
-                    // new
                     for j in start_row..end_row {
                         sum -= *self.sas.get_unchecked(i, j)
                             * *chunk.get_unchecked(j - start_row);
                     }
-
-                    // old
-                    // for j in end_row..len {
-                    //     sum -= *self.sas.get_unchecked(i, j)
-                    //         * *old_xs.get_unchecked(j);
-                    // }
-
                     sum += aii * *chunk.get_unchecked(i - start_row);
 
                     // global to local
