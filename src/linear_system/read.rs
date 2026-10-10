@@ -49,7 +49,8 @@ pub fn extract_sas(input: &str) -> Option<SquareMatrix> {
     let mut lines = input.split('\n');
 
     let is_symmetric = lines.next().unwrap().trim().contains("symmetric");
-    let n = parse_header(lines.next().unwrap())?;
+    let n = lines.next()?;
+    let n = parse_header(n)?;
     let mut matrix = SquareMatrix::new(n);
 
     for line in lines {
@@ -57,9 +58,14 @@ pub fn extract_sas(input: &str) -> Option<SquareMatrix> {
         let Some(row) = tokens.next().and_then(|s| s.parse::<usize>().ok()) else {
             break;
         };
-        let col = tokens.next().unwrap().parse::<usize>().unwrap();
+        let col = tokens.next()?.parse::<usize>().ok()?;
         let val = match tokens.next() {
-            Some(val_str) => val_str.parse::<f64>().unwrap(),
+            Some(val_str) => {
+                let Ok(val) = val_str.parse::<f64>() else {
+                    return None;
+                };
+                val
+            },
             None => 1.0,
         };
 
