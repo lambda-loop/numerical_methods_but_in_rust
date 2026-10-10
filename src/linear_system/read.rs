@@ -83,9 +83,18 @@ pub fn extract_sas(input: &str) -> Option<SquareMatrix> {
 }
 
 fn parse_header(header: &str) -> Option<usize> {
-    let mut parts = header
+    let parts: Vec<_> = header
         .split_whitespace()
-        .map(|s| s.parse::<usize>().unwrap());
+        .map(|s| s.parse::<usize>())
+        .collect();
+
+    for part in &parts {
+        if part.is_err() { return None };
+    }
+
+    let mut parts = parts
+        .into_iter()
+        .map(|s| s.unwrap());
 
     let rows = parts.next().unwrap();
     let cols = parts.next().unwrap();
