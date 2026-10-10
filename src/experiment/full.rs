@@ -11,7 +11,7 @@ use experiment::*;
 pub fn full(matrix_name: &str) -> Vec<ExperimentResult> {
     let jcwsc: String = String::from("jacobi classical with serial checkups");
     let jgwsc: String = String::from("jacobi gapped with serial checkups");
-    let ls = LinearSystem::new(matrix_name);
+    let ls = LinearSystem::new(matrix_name).unwrap();
     let mut id = 0;
     let mut results = Vec::<ExperimentResult>::new();
 

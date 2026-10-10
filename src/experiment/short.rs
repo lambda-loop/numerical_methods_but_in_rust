@@ -18,7 +18,7 @@ pub fn full(matrix_name: &str) {
     let jgwsc: String = String::from("jacobi gapped with serial checkups");
     let jdwsc: String = String::from("jacobi delayed with serial checkups");
     let jgdwsc: String = String::from("jacobi gapped and delayed with serial checkups");
-    let ls = LinearSystem::new(matrix_name);
+    let ls = LinearSystem::new(matrix_name).unwrap();
     let mut id = 0;
     let mut results = Vec::<ExperimentResult>::new();
 
