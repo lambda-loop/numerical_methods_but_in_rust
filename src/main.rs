@@ -34,14 +34,16 @@ pub fn main() {
             let ls = LinearSystem::new(&m);
             (m, ls)
         })
-        .filter(|(_, opt)| opt.is_some())
-        .map(|(m, opt)| (m, opt.unwrap()))
+        // .filter(|(_, opt)| opt.is_some())
+        // .map(|(m, opt)| (m, opt.unwrap()))
         .collect();
 
     create_files("data/as");
-    for (m, ls) in lss {
-        let c = check(&ls);
-        move_to(&m, c);
+    for (m, opt_ls) in lss {
+        if let Some(ls) = opt_ls {
+            let c = check(&ls);
+            move_to(&m, c);
+        } else { to_trash(&m); }
     }
 }
 
@@ -50,7 +52,14 @@ use std::fs;
 fn create_files(path: &str) {
     fs::create_dir_all(format!("{path}/diverged")).unwrap();
     fs::create_dir_all(format!("{path}/too_long")).unwrap();
+    fs::create_dir_all(format!("{path}/bad_formed")).unwrap();
     
+}
+
+fn to_trash(matrix_name: &str) {
+    let from = format!("data/as/{matrix_name}.mtx");
+    let to   = format!("data/as/bad_formed/{matrix_name}.mtx");
+    fs::rename(from, to).unwrap();
 }
 
 fn move_to(matrix_name: &str, c: Convergence) {
