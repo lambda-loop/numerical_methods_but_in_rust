@@ -6,7 +6,7 @@ use std::thread;
 use crate::linear_system::checkup::classical_serial;
 
 const NUM_THREADS: usize = 32;
-const BOUND: u64         = 100_000;
+const BOUND: u64         = 100_000_000;
 
 pub enum Convergence {
     Converged, 

@@ -34,16 +34,26 @@ pub fn main() {
             let ls = LinearSystem::new(&m);
             (m, ls)
         })
-        // .filter(|(_, opt)| opt.is_some())
-        // .map(|(m, opt)| (m, opt.unwrap()))
+        .filter(|(_, opt)| opt.is_some())
+        .map(|(m, opt)| (m, opt.unwrap()))
         .collect();
 
     create_files("data/as");
-    for (m, opt_ls) in lss {
-        if let Some(ls) = opt_ls {
-            let c = check(&ls);
-            move_to(&m, c);
-        } else { to_trash(&m); }
+    for (m, ls) in lss {
+        let msg = match check(&ls) {
+            Convergence::Converged => "converged",
+            Convergence::Diverged  => "diverged",
+            _ => todo!(),
+        };
+        println!("{m} - {msg}");
+        // if check(&ls) == Convergence::Converged {
+
+            
+        // };
+        // if let Some(ls) = opt_ls {
+        //     let c = check(&ls);
+        //     move_to(&m, c);
+        // } else { to_trash(&m); }
     }
 }
 
@@ -88,7 +98,7 @@ impl MatrixInfo {
 
 
 fn all_matrice_names() -> Vec<String> {
-    let dir_name = "data/as";
+    let dir_name = config::AS_PATH;
     let mut dir = std::fs::read_dir(dir_name).unwrap();
 
     let mut ms = Vec::new();
