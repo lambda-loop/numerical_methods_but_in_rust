@@ -34,6 +34,8 @@ pub fn main() {
             let ls = LinearSystem::new(&m);
             (m, ls)
         })
+        .filter(|(_, opt)| opt.is_some())
+        .map(|(m, opt)| (m, opt.unwrap()))
         .collect();
 
     create_files("data/as");

@@ -21,7 +21,7 @@ pub struct LinearSystem {
 }
 
 impl LinearSystem {
-    pub fn new(matrix_name: &str) -> Self {
+    pub fn new(matrix_name: &str) -> Option<Self> {
         let mut as_path = Path::new(config::AS_PATH).join(matrix_name);
         as_path.set_extension("mtx");
         let bs_path = Path::new(config::BS_PATH).join(matrix_name);
@@ -30,12 +30,12 @@ impl LinearSystem {
             panic!("Erro ao ler o arquivo A ({:?}): {err}", as_path);
         });
 
-        let sas = read::extract_sas(&as_content);
+        let sas = read::extract_sas(&as_content)?;
         let n = sas.len();
 
         // let opt_bs_content = fs::read_to_string(&bs_path);
         let sbs = read::handle_bs(bs_path, n);
-        Self { sas, sbs, slen: n }
+        Some(Self { sas, sbs, slen: n })
     }
 
     pub unsafe fn initilize_xs(&self) -> Vec<f64> {

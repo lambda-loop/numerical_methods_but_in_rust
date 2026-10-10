@@ -45,11 +45,11 @@ pub fn extract_sbs(input: &str) -> Vec<f64> {
 }
 
 // where "sas" stands for system 'as
-pub fn extract_sas(input: &str) -> SquareMatrix {
+pub fn extract_sas(input: &str) -> Option<SquareMatrix> {
     let mut lines = input.split('\n');
 
     let is_symmetric = lines.next().unwrap().trim().contains("symmetric");
-    let n = parse_header(lines.next().unwrap());
+    let n = parse_header(lines.next().unwrap())?;
     let mut matrix = SquareMatrix::new(n);
 
     for line in lines {
@@ -73,10 +73,10 @@ pub fn extract_sas(input: &str) -> SquareMatrix {
         }
     }
 
-    matrix
+    Some(matrix)
 }
 
-fn parse_header(header: &str) -> usize {
+fn parse_header(header: &str) -> Option<usize> {
     let mut parts = header
         .split_whitespace()
         .map(|s| s.parse::<usize>().unwrap());
@@ -84,6 +84,9 @@ fn parse_header(header: &str) -> usize {
     let rows = parts.next().unwrap();
     let cols = parts.next().unwrap();
 
-    assert_eq!(rows, cols);
-    rows
+    if rows == cols {
+        Some(rows)
+    } else {
+        None
+    }
 }
