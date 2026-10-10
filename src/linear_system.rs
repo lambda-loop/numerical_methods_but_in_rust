@@ -26,9 +26,12 @@ impl LinearSystem {
         as_path.set_extension("mtx");
         let bs_path = Path::new(config::BS_PATH).join(matrix_name);
 
-        let as_content = fs::read_to_string(&as_path).unwrap_or_else(|err| {
-            panic!("Erro ao ler o arquivo A ({:?}): {err}", as_path);
-        });
+        let as_content = fs::read_to_string(&as_path).ok()?;
+        // let as_content = fs::read_to_string(&as_path).unwrap_or_else(|err| {
+            // return None;
+            // panic!("Erro ao ler o arquivo A ({:?}): {err}", as_path);
+            // panic!("Erro ao ler o arquivo A ({:?}): {err}", as_path);
+        // });
 
         let sas = read::extract_sas(&as_content)?;
         let n = sas.len();
