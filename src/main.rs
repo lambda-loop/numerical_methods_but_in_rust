@@ -35,15 +35,18 @@ pub fn main() {
             (m, ls)
         })
         .filter(|(_, opt)| opt.is_some())
+        .filter(|(m, _)| !ALREADY_CHECKED.contains(&m.as_str()))
         .map(|(m, opt)| (m, opt.unwrap()))
         .collect();
 
     create_files("data/as");
     for (m, ls) in lss {
+
+
         let msg = match check(&ls) {
-            Convergence::Converged => "converged",
-            Convergence::Diverged  => "diverged",
-            _ => todo!(),
+            Convergence::Converged(n) => format!("converged in {n}"),
+            Convergence::Diverged  => "diverged".to_string(),
+            _ => "still_to_long!".to_string(),
         };
         println!("{m} - {msg}");
         // if check(&ls) == Convergence::Converged {
@@ -75,7 +78,7 @@ fn to_trash(matrix_name: &str) {
 fn move_to(matrix_name: &str, c: Convergence) {
     let from = format!("data/as/{matrix_name}.mtx");
     let to   = match c {
-        Convergence::Converged => from.to_string(),
+        Convergence::Converged(_) => from.to_string(),
         Convergence::Diverged => format!("data/as/diverged/{matrix_name}.mtx"),
         Convergence::OutOfBounds=> format!("data/as/too_long/{matrix_name}.mtx"),
     };
@@ -117,6 +120,14 @@ fn all_matrice_names() -> Vec<String> {
     ms
 }
 
+const ALREADY_CHECKED: [&'static str; 6] = [
+    "494_bus ",
+    "1138_bus ",
+    "662_bus ",
+    "bcsstk21 ",
+    "bcsstk09",
+    "memplus ",
+];
 
 // jaspiom gap experiemnt
 // use experiment::ExperimentResult;
