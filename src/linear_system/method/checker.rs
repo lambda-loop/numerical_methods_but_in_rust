@@ -1,12 +1,14 @@
 // use crate::experiment::
 use crate::linear_system::LinearSystem;
+use crate::config;
+
 use std::mem;
 use std::thread;
 
 use crate::linear_system::checkup::classical_serial;
 
 const NUM_THREADS: usize = 32;
-const BOUND: u64         = 100_100_000_000;
+// const BOUND: u64         = 100_100_000_000;
 
 pub enum Convergence {
     Converged(u64), 
@@ -52,7 +54,7 @@ pub fn check(
         mem::swap(&mut xs, &mut buffer);
         iters += 1;
 
-        if iters >= BOUND && !converged { return Convergence::OutOfBounds };
+        if iters >= config::BOUND && !converged { return Convergence::OutOfBounds };
     }
 
     Convergence::Converged(iters)

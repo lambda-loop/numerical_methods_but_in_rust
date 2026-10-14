@@ -13,5 +13,7 @@ pub const TESTING_GAPS: [u8; 3] = [2, 6, 8];
 pub const TESTING_ODD_GAPS: [u8; 3] = [3, 7, 9];
 
 pub const NUM_SHOTS: usize = 10;
+const BOUND: u64         = 100_000_000;
+// const BOUND: u64         = 100_100_000_000;
 
 
