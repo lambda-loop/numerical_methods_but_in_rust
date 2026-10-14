@@ -121,12 +121,12 @@ fn all_matrice_names() -> Vec<String> {
 }
 
 const ALREADY_CHECKED: [&'static str; 6] = [
-    "494_bus ",
-    "1138_bus ",
-    "662_bus ",
-    "bcsstk21 ",
+    "494_bus" ,
+    "1138_bus",
+    "662_bus" ,
+    "bcsstk21",
     "bcsstk09",
-    "memplus ",
+    "memplus" ,
 ];
 
 // jaspiom gap experiemnt
