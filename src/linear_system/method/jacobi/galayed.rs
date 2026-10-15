@@ -10,7 +10,7 @@ use crate::linear_system::checkup::classical_serial;
 
 // never call it with num_threads <= 2!
 // gap should be odd and greater of equals to 3
-pub fn gapped_and_delayed_with_checkup_serial(
+pub fn method(
     linear_system: &LinearSystem,
     num_threads: usize,
     gap: u8,

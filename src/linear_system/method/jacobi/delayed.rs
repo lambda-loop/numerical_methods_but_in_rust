@@ -12,7 +12,7 @@ pub fn method(
 ) -> (u64, Vec<f64>) {
     let num_threads = num_threads - 1;
     let mut converged = false;
-    let mut iters: u64 = 0;
+    let mut iters: u64 = 1;
 
     let mut xs0 = unsafe { linear_system.initilize_xs() };
     let mut xs1 = vec![0 as f64; linear_system.slen];
