@@ -1,3 +1,6 @@
+
+// aims to be BOTH delayed AND gapped!
+
 // use crate::experiment::
 use crate::linear_system::LinearSystem;
 use std::mem;

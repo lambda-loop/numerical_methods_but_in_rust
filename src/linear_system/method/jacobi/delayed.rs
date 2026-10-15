@@ -6,7 +6,7 @@ use std::thread;
 use crate::linear_system::checkup::classical_serial;
 
 // never call it with num_threads = 1!
-pub fn delayed_with_serial_checkup(
+pub fn method(
     linear_system: &LinearSystem,
     num_threads: usize,
 ) -> (u64, Vec<f64>) {
