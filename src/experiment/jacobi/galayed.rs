@@ -1,16 +1,12 @@
-// questionable stuff
 
-// use super::*;
+use super::galayed as method;
+
 use crate::config;
-use crate::linear_system::method::gapped_and_delayed_with_serial_checkup::gapped_and_delayed_with_checkup_serial as method;
 use crate::linear_system::LinearSystem;
-// use std::time::Duration;
 
 use crate::experiment::PerformanceAndQuality as Performance;
 use crate::experiment::ProblemSolutionConfig as Config;
 
-// linear_system: LinearSystem,
-// num_threads: usize,
 pub fn experienting(linear_system: &LinearSystem) -> Vec<(Performance, Config)> {
     let mut results = Vec::new();
 

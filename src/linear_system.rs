@@ -202,13 +202,22 @@ impl LinearSystem {
 
     /// Calcula a Norma L2 (Euclidiana) do resíduo: ||b - Ax||_2
     pub fn calculate_residual(&self, xs: &[f64]) -> f64 {
+        assert_eq!(
+            xs.len(),
+            self.slen,
+            "O tamanho do vetor x não corresponde ao sistema"
+        );
+        
+        if let Some((j, x)) = xs.iter().enumerate().find(|(_, x)| !x.is_finite()) {
+            panic!("x já chegou não finito: xs[{j}] = {x}");
+        }
         let len = self.slen;
         debug_assert!(
             xs.len() == len,
             "O tamanho do vetor x não corresponde ao sistema"
         );
 
-        let mut residual_norm_sq = 0.0;
+        let mut residual_norm = 0.0_f64;
 
         for i in 0..len {
             unsafe {
@@ -221,13 +230,18 @@ impl LinearSystem {
 
                 // r_i = b_i - (A * x)_i
                 let r_i = *self.sbs.get_unchecked(i) - ax_i;
-
+                assert!(
+                    r_i.is_finite(),
+                    "Resíduo não finito na linha {i}: b_i={}, Ax_i={ax_i}",
+                    *self.sbs.get_unchecked(i)
+                );
                 // Soma os quadrados dos resíduos
-                residual_norm_sq += r_i * r_i;
+                // residual_norm_sq += r_i * r_i;
+                residual_norm = residual_norm.hypot(r_i);
             }
         }
 
         // Retorna a raiz quadrada da soma
-        residual_norm_sq.sqrt()
+        residual_norm
     }
 }

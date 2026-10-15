@@ -1,8 +1,11 @@
+
+
+use super::classical as method;
+
 // questionable stuff
 
 // use super::*;
 use crate::config;
-use crate::linear_system::method::classical_with_serial_checkup::classical_with_serial_checkup as method;
 use crate::linear_system::LinearSystem;
 // use std::time::Duration;
 
@@ -42,3 +45,4 @@ pub fn experienting(linear_system: &LinearSystem) -> Vec<(Performance, Config)> 
 
     results
 }
+

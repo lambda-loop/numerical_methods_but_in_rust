@@ -1,16 +1,12 @@
-// questionable stuff
 
-// use super::*;
+use super::gapped as method;
+
 use crate::config;
-use crate::linear_system::method::gapped_with_serial_checkup::gapped_with_serial_checkup as method;
 use crate::linear_system::LinearSystem;
-// use std::time::Duration;
 
 use crate::experiment::PerformanceAndQuality as Performance;
 use crate::experiment::ProblemSolutionConfig as Config;
 
-// linear_system: LinearSystem,
-// num_threads: usize,
 pub fn experienting(linear_system: &LinearSystem) -> Vec<(Performance, Config)> {
     let mut results = Vec::new();
 
@@ -19,8 +15,6 @@ pub fn experienting(linear_system: &LinearSystem) -> Vec<(Performance, Config)> 
             let now = std::time::Instant::now();
             let (iters, final_xs) = method(linear_system, num_threads, gap);
             let elapsed = now.elapsed();
-
-            // println!("{final_xs:?}");
 
             let performance = Performance {
                 num_iterations: iters,
@@ -44,3 +38,4 @@ pub fn experienting(linear_system: &LinearSystem) -> Vec<(Performance, Config)> 
 
     results
 }
+

@@ -4,21 +4,13 @@ mod experiment;
 mod linear_system;
 
 use experiment::Metadata;
-use experiment::classical_with_serial_checkup::experienting as exp;
+// use experiment::classical_with_serial_checkup::experienting as exp;
 use experiment::ExperimentResult as ExpRes;
 use linear_system::LinearSystem;
 
-use classical_with_serial_checkup::classical_with_serial_checkup as jc;
 use config::OUT_PATH;
-// use jaspiom::chaotic_jaspiom_in_place as jm;
-use linear_system::method::classical_with_serial_checkup;
-use linear_system::method::jaspiom;
-// const MATRIX_NAME: &'static str = "dwb512";
-const MATRIX_NAME: &'static str = "orsirr_2";
-// const MATRIX_NAME: &'static str = "orsirr_1";
-// const MATRIX_NAME: &'static str = "add32";
-
 use linear_system::method::checker::*;
+use experiment::jacobi;
 pub struct MatrixInfo {
     pub name: &'static str,
     pub len: usize,
@@ -26,37 +18,10 @@ pub struct MatrixInfo {
 }
 
 pub fn main() {
+    println!("{}", experiment::ExperimentResult::HEADER);
     let ms = all_matrice_names();
-
-    let lss: Vec<_> = ms
-        .into_iter()
-        .map(|m| {
-            let ls = LinearSystem::new(&m);
-            (m, ls)
-        })
-        .filter(|(_, opt)| opt.is_some())
-        .filter(|(m, _)| !ALREADY_CHECKED.contains(&m.as_str()))
-        .map(|(m, opt)| (m, opt.unwrap()))
-        .collect();
-
-    create_files("data/as");
-    for (m, ls) in lss {
-
-
-        let msg = match check(&ls) {
-            Convergence::Converged(n) => format!("converged in {n}"),
-            Convergence::Diverged  => "diverged".to_string(),
-            _ => "still_to_long!".to_string(),
-        };
-        println!("{m} - {msg}");
-        // if check(&ls) == Convergence::Converged {
-
-            
-        // };
-        // if let Some(ls) = opt_ls {
-        //     let c = check(&ls);
-        //     move_to(&m, c);
-        // } else { to_trash(&m); }
+    for m in ms {
+        jacobi::experiment(&m);
     }
 }
 

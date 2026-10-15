@@ -1,12 +1,10 @@
 // AI GENERATED:
-pub mod classical_with_serial_checkup;
-pub mod delayed_with_serial_checkup;
-pub mod full;
-pub mod gapped_and_delayed_with_serial_checkup;
-pub mod gapped_with_serial_checkup;
-pub mod short;
+// pub mod full;
+// pub mod short;
 pub mod jaspiom;
 pub mod jaspiomz;
+
+pub mod jacobi;
 
 use std::time::Duration;
 

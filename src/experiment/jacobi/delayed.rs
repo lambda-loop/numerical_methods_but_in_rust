@@ -1,8 +1,9 @@
 // questionable stuff
 
+use super::delayed as method;
+
 // use super::*;
 use crate::config;
-use crate::linear_system::method::delayed_with_serial_checkup::delayed_with_serial_checkup as method;
 use crate::linear_system::LinearSystem;
 // use std::time::Duration;
 
