@@ -17,7 +17,6 @@ use crate::linear_system::{LinearSystem};
 
 use crate::config::{NUM_SHOTS};
 use experiment::*;
-
 pub fn experiment(matrix_name: &str) {
     let ls = LinearSystem::new(matrix_name).unwrap();
     let mut id = 0;
@@ -31,6 +30,7 @@ pub fn experiment(matrix_name: &str) {
                 algorithm_name: String::from("classical"),
                 file_name: String::from(matrix_name),
             };
+            performance.register_result(&format!("{matrix_name}-classical"), id);
             id += 1;
             let r = ExperimentResult {
                 metadata,
@@ -48,6 +48,8 @@ pub fn experiment(matrix_name: &str) {
                 algorithm_name: String::from("gapped"),
                 file_name: String::from(matrix_name),
             };
+
+            performance.register_result(&format!("{matrix_name}-gapped"), id);
             id += 1;
             let r = ExperimentResult {
                 metadata,
@@ -65,6 +67,9 @@ pub fn experiment(matrix_name: &str) {
                 algorithm_name: String::from("delayed"),
                 file_name: String::from(matrix_name),
             };
+
+
+            performance.register_result(&format!("{matrix_name}-delayed"), id);
             id += 1;
             let r = ExperimentResult {
                 metadata,
@@ -82,6 +87,9 @@ pub fn experiment(matrix_name: &str) {
                 algorithm_name: String::from("galayed"),
                 file_name: String::from(matrix_name),
             };
+
+
+            performance.register_result(&format!("{matrix_name}-galayed"), id);
             id += 1;
             let r = ExperimentResult {
                 metadata,

@@ -15,7 +15,7 @@ pub fn method(
     num_threads: usize,
     gap: u8,
 ) -> (u64, Vec<f64>) {
-    let num_threads_delayed = num_threads - 1;
+    // let num_threads_delayed = num_threads - 1;
     let mut converged = false;
     let mut iters: u64 = 0;
 
@@ -25,7 +25,7 @@ pub fn method(
     let mut xs3 = vec![0 as f64; linear_system.slen];
 
     let step_size = (linear_system.slen + num_threads - 1) / num_threads;
-    let step_size_delayed = (linear_system.slen + num_threads_delayed - 1) / num_threads_delayed;
+    // let step_size_delayed = (linear_system.slen + num_threads_delayed - 1) / num_threads_delayed;
 
     let real_gap = (gap - 1) / 2;
     while !converged {
@@ -64,8 +64,8 @@ pub fn method(
         // DELAYED SCOPE
         // xs1 -> xs3
         thread::scope(|s| {
-            for (i, chunk) in xs3.chunks_mut(step_size_delayed).enumerate() {
-                let start_row = i * step_size_delayed;
+            for (i, chunk) in xs3.chunks_mut(step_size).enumerate() {
+                let start_row = i * step_size;
                 let end_row = start_row + chunk.len();
                 let xs_ref = &xs1;
                 unsafe {

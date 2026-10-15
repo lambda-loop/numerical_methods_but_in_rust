@@ -18,12 +18,14 @@ pub fn experienting(linear_system: &LinearSystem) -> Vec<(Performance, Config)> 
             let (iters, final_xs) = method(linear_system, num_threads, gap);
             let elapsed = now.elapsed();
 
+            let final_residual = linear_system.calculate_residual(&final_xs);
             // println!("{final_xs:?}");
 
             let performance = Performance {
                 num_iterations: iters,
                 time_spent: elapsed,
-                final_residual: linear_system.calculate_residual(&final_xs),
+                final_result: final_xs,
+                final_residual,
                 converged: true,
             };
 

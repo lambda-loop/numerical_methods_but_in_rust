@@ -1,12 +1,14 @@
 // AI GENERATED:
 // pub mod full;
 // pub mod short;
-pub mod jaspiom;
-pub mod jaspiomz;
+// pub mod jaspiom;
+// pub mod jaspiomz;
 
 pub mod jacobi;
 
 use std::time::Duration;
+
+use crate::config::OUT_PATH;
 
 #[derive(Debug)]
 pub struct ProblemSolutionConfig {
@@ -34,7 +36,7 @@ impl ProblemSolutionConfig {
 pub struct PerformanceAndQuality {
     pub num_iterations: u64,
     pub time_spent: Duration,
-    // pub final_result: Vec<f64>,
+    pub final_result: Vec<f64>,
     pub final_residual: f64,
     pub converged: bool,
 }
@@ -50,6 +52,12 @@ impl PerformanceAndQuality {
             self.final_residual,
             self.converged
         )
+    }
+
+    pub fn register_result(&self, file_name: &str, id: u64) {
+        let file_name = format!("{OUT_PATH}/{file_name}-{id}.xs");
+        let xs = format!("\"{:?}\"", self.final_result);
+        std::fs::write(file_name, xs);
     }
 }
 

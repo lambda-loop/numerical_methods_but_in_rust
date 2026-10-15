@@ -10,7 +10,7 @@ pub fn method(
     linear_system: &LinearSystem,
     num_threads: usize,
 ) -> (u64, Vec<f64>) {
-    let num_threads = num_threads - 1;
+    // let num_threads = num_threads - 1;
     let mut converged = false;
     let mut iters: u64 = 1;
 
