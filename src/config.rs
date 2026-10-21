@@ -1,8 +1,8 @@
 //
 
 pub const EPSI: f64 = 1e-12;
-pub const AS_PATH: &'static str = "data/as/too_long/";
-// pub const AS_PATH: &'static str = "data/as/";
+// pub const AS_PATH: &'static str = "data/as/too_long/";
+pub const AS_PATH: &'static str = "data/as/";
 pub const BS_PATH: &'static str = "data/bs/";
 pub const OUT_PATH: &'static str = "data/out/";
 
