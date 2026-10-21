@@ -19,7 +19,10 @@ pub struct MatrixInfo {
 
 pub fn main() {
     println!("{}", experiment::ExperimentResult::HEADER);
-    let ms = all_matrice_names();
+    let ms = all_matrice_names()
+        .into_iter()
+        .filter(|m_name| !TOO_LONG.contains(&m_name.as_str()));
+        // .collect();
     for m in ms {
         jacobi::experiment(&m);
     }
@@ -84,6 +87,12 @@ fn all_matrice_names() -> Vec<String> {
 
     ms
 }
+
+const TOO_LONG: [&'static str; 3] = [
+    "nos7" ,
+    "nos2",
+    "saylr3",
+];
 
 const ALREADY_CHECKED: [&'static str; 6] = [
     "494_bus" ,

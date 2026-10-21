@@ -60,44 +60,44 @@ pub fn experiment(matrix_name: &str) {
             println!("{}", r.to_csv());
         }
 
-        let rs = delayed::experienting(&ls);
-        for (performance, config) in rs {
-            let metadata = Metadata {
-                id,
-                algorithm_name: String::from("delayed"),
-                file_name: String::from(matrix_name),
-            };
+        // let rs = delayed::experienting(&ls);
+        // for (performance, config) in rs {
+        //     let metadata = Metadata {
+        //         id,
+        //         algorithm_name: String::from("delayed"),
+        //         file_name: String::from(matrix_name),
+        //     };
 
 
-            performance.register_result(&format!("{matrix_name}-delayed"), id);
-            id += 1;
-            let r = ExperimentResult {
-                metadata,
-                problem_solution_config: config,
-                performance_and_quality: performance,
-            };
+        //     performance.register_result(&format!("{matrix_name}-delayed"), id);
+        //     id += 1;
+        //     let r = ExperimentResult {
+        //         metadata,
+        //         problem_solution_config: config,
+        //         performance_and_quality: performance,
+        //     };
 
-            println!("{}", r.to_csv());
-        }
+        //     println!("{}", r.to_csv());
+        // }
 
-        let rs = galayed::experienting(&ls);
-        for (performance, config) in rs {
-            let metadata = Metadata {
-                id,
-                algorithm_name: String::from("galayed"),
-                file_name: String::from(matrix_name),
-            };
+        // let rs = galayed::experienting(&ls);
+        // for (performance, config) in rs {
+        //     let metadata = Metadata {
+        //         id,
+        //         algorithm_name: String::from("galayed"),
+        //         file_name: String::from(matrix_name),
+        //     };
 
 
-            performance.register_result(&format!("{matrix_name}-galayed"), id);
-            id += 1;
-            let r = ExperimentResult {
-                metadata,
-                problem_solution_config: config,
-                performance_and_quality: performance,
-            };
+        //     performance.register_result(&format!("{matrix_name}-galayed"), id);
+        //     id += 1;
+        //     let r = ExperimentResult {
+        //         metadata,
+        //         problem_solution_config: config,
+        //         performance_and_quality: performance,
+        //     };
 
-            println!("{}", r.to_csv());
-        }
+        //     println!("{}", r.to_csv());
+        // }
     }
 }
