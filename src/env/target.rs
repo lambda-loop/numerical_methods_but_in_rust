@@ -8,8 +8,9 @@ use std::fs;
 const TABLE_PATH: &'static str = "table";
 pub fn setup_ls() -> Option<LinearSystem> {
     let mut args = env::args();
-    let arg = args.next()
-        .expect("wheres the arg??");
+    let arg = env::args()
+        .nth(1)
+        .expect("missing matrix index");
 
     let (content, m_name)= get_matrix_content(&arg);
     LinearSystem::from(&content, &m_name)
@@ -33,17 +34,17 @@ pub fn get_matrix_name<'a> (arg: &str, input: &'a str) -> Option<MatrixTag<&'a s
     for line in input.lines() {
         if line.starts_with("LONG") {
             let (clean, m_name) = line
-                .strip_prefix("Long - ").expect("problem with table format")
+                .strip_prefix("LONG - ").expect("problem with table format")
                 .split_once(" - ").expect("problem with table format");
             if arg == clean {
-                return m_name.strip_suffix("\"")
+                return m_name.trim_matches("\"")
                     .map(|line| Long(line))
             }
         } else {
             let (clean, m_name) = line
                 .split_once(" - ").expect("problem with table format");
             if arg == clean {
-                return m_name.strip_suffix("\"")
+                return m_name.trim_matches("\"")
                     .map(|line| Fine(line))
             }
         }
@@ -59,12 +60,12 @@ fn get_matrix_content(arg: &str) -> (String, String) {
     let m_name = get_matrix_name(arg, &table).expect("line didnt found in the table");
     let (as_path, m_name) = match m_name {
         Long(m_name) => {
-            let m_path = format!("{LONG_AS_PATH}/m_name");
+            let m_path = format!("{LONG_AS_PATH}/{m_name}");
             (m_path, m_name)
         },
 
         Fine(m_name) => {
-            let m_path = format!("{AS_PATH}/m_name");
+            let m_path = format!("{AS_PATH}/{m_name}");
             (m_path, m_name)
         },
     };
