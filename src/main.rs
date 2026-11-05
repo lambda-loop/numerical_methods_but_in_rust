@@ -19,7 +19,8 @@ pub struct MatrixInfo {
 }
 
 pub fn main() {
-    env::setup("aa");
+    let table = env::setup("aa");
+    println!("{table}");
 
 
 }
