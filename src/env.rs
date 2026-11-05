@@ -21,7 +21,7 @@ pub fn setup(
         }
 
         if let Some(ext) = entry.path().extension() {
-            if ext != ".mtx" { continue }
+            if ext != "mtx" { continue }
             let file_name = entry.file_name();
             println!("{file_name:?}");
         }
