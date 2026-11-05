@@ -21,11 +21,13 @@ pub struct MatrixInfo {
 }
 
 pub fn main() {
-    let table = env::format_table().expect("what?");
+    // let table = env::format_table().expect("what?");
     // println!("{table}");
-    let dir = std::fs::read_dir(".").expect("valid dir path");
-    let mut file = std::fs::File::create("table").expect("hun");
-    writeln!(file, "{table}").unwrap();
+    // let dir = std::fs::read_dir(".").expect("valid dir path");
+    // let mut file = std::fs::File::create("table").expect("hun");
+    // writeln!(file, "{table}").unwrap();
+    let opt_ls = env::target::setup_ls();
+    println!("{opt_ls:?}")
 }
 /*
 pub fn main() {

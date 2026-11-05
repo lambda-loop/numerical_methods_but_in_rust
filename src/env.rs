@@ -1,5 +1,5 @@
 
-mod target;
+pub mod target;
 
 use std::env;
 use std::fs::{read_dir};

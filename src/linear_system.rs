@@ -41,6 +41,17 @@ impl LinearSystem {
         Some(Self { sas, sbs, slen: n })
     }
 
+    pub fn from(matrix_name: &str, as_content: &str) -> Option<Self> {
+        let bs_path = Path::new(config::BS_PATH).join(matrix_name);
+
+        let sas = read::extract_sas(&as_content)?;
+        let n = sas.len();
+
+        // let opt_bs_content = fs::read_to_string(&bs_path);
+        let sbs = read::handle_bs(bs_path, n);
+        Some(Self { sas, sbs, slen: n })
+    }
+
     pub unsafe fn initilize_xs(&self) -> Vec<f64> {
         let len = self.slen;
         let mut xs: Vec<f64> = Vec::with_capacity(len);
