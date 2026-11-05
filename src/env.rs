@@ -13,7 +13,8 @@ pub fn setup(
     let mut long_ms = read_dir(LONG_AS_PATH)?;
 
     let mut target_table = String::new();
-    for (i, m) in ms.enumerate() {
+    let mut idx = 0;
+    for m in ms {
         let entry = m?;
         if !entry.file_type()?.is_file() {
             continue
@@ -22,12 +23,13 @@ pub fn setup(
         if let Some(ext) = entry.path().extension() {
             if ext != "mtx" { continue }
             let file_name = entry.file_name();
-            let line = format!("{i} - {file_name:?}\n");
+            let line = format!("{idx} - {file_name:?}\n");
+            idx += 1;
             target_table.push_str(&line);
         }
     }
 
-    for (i, m) in long_ms.enumerate() {
+    for m in long_ms {
         let entry = m?;
         if !entry.file_type()?.is_file() {
             continue
@@ -36,7 +38,8 @@ pub fn setup(
         if let Some(ext) = entry.path().extension() {
             if ext != "mtx" { continue }
             let file_name = entry.file_name();
-            let line = format!("LONG{i} - {file_name:?}\n");
+            let line = format!("LONG - {idx} - {file_name:?}\n");
+            idx += 1;
             target_table.push_str(&line);
         }
     }
