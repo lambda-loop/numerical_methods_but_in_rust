@@ -12,6 +12,8 @@ use linear_system::LinearSystem;
 use config::OUT_PATH;
 use linear_system::method::checker::*;
 use experiment::jacobi;
+
+use std::io::{self, Write};
 pub struct MatrixInfo {
     pub name: &'static str,
     pub len: usize,
@@ -19,10 +21,11 @@ pub struct MatrixInfo {
 }
 
 pub fn main() {
-    let table = env::setup().expect("what?");
+    let table = env::format_table().expect("what?");
     println!("{table}");
-
-
+    let dir = std::fs::read_dir(".").expect("valid dir path");
+    let mut file = std::fs::File::create("table").expect("hun");
+    writeln!(file, &table).unwrap();
 }
 /*
 pub fn main() {

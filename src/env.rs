@@ -6,7 +6,7 @@ use std::fs::{read_dir};
 
 use crate::config::{AS_PATH, LONG_AS_PATH};
 
-pub fn setup(
+pub fn format_table (
     // target_path: &str
 ) -> std::io::Result<String> {
     let mut ms      = read_dir(AS_PATH)?;
