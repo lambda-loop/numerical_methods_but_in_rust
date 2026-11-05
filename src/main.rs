@@ -2,6 +2,7 @@
 mod config;
 mod experiment;
 mod linear_system;
+mod env;
 
 use experiment::Metadata;
 // use experiment::classical_with_serial_checkup::experienting as exp;
@@ -17,6 +18,12 @@ pub struct MatrixInfo {
     pub is_symmetric: bool,
 }
 
+pub fn main() {
+    env::setup("aa");
+
+
+}
+/*
 pub fn main() {
     println!("{}", experiment::ExperimentResult::HEADER);
     let ms = all_matrice_names()
@@ -102,6 +109,7 @@ const ALREADY_CHECKED: [&'static str; 6] = [
     "bcsstk09",
     "memplus" ,
 ];
+*/
 
 // jaspiom gap experiemnt
 // use experiment::ExperimentResult;
