@@ -19,7 +19,7 @@ pub struct MatrixInfo {
 }
 
 pub fn main() {
-    let table = env::setup("aa").expect("what?");
+    let table = env::setup().expect("what?");
     println!("{table}");
 
 
