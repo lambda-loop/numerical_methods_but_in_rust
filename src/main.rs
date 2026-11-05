@@ -22,10 +22,10 @@ pub struct MatrixInfo {
 
 pub fn main() {
     let table = env::format_table().expect("what?");
-    println!("{table}");
+    // println!("{table}");
     let dir = std::fs::read_dir(".").expect("valid dir path");
     let mut file = std::fs::File::create("table").expect("hun");
-    writeln!(file, &table).unwrap();
+    writeln!(file, "{table}").unwrap();
 }
 /*
 pub fn main() {
