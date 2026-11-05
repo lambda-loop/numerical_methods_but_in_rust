@@ -15,7 +15,6 @@ pub fn setup(
     // let mut target_tabble = String::new();
 
     for m in ms.chain(long_ms) {
-        println!("hey");
         let entry = m?;
         if !entry.file_type()?.is_file() {
             continue
