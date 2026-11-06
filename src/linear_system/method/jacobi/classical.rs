@@ -5,7 +5,7 @@ use std::thread;
 
 use crate::linear_system::checkup::classical_serial;
 
-pub fn method(
+pub fn method (
     linear_system: &LinearSystem,
     num_threads: usize,
 ) -> (u64, Vec<f64>) {

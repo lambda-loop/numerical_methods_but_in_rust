@@ -10,10 +10,6 @@ pub fn method(
     num_threads: usize,
     gap: u8,
 ) -> (u64, Vec<f64>) {
-    debug_assert!(
-        gap >= 2 && gap % 2 == 0,
-        "Em modo debug: o gap deve ser par e >= 2!"
-    );
     let mut converged = false;
     let mut iters: u64 = 0;
 
@@ -22,36 +18,26 @@ pub fn method(
 
     let step_size = (xs.len() + num_threads - 1) / num_threads;
 
-    let real_gap = gap / 2;
     while !converged {
-        for _ in 0..real_gap {
+        for _ in 0..gap {
             // PING xs -> buffer
             thread::scope(|s| {
                 for (i, chunk) in buffer.chunks_mut(step_size).enumerate() {
                     let start_row = i * step_size;
                     let end_row = start_row + chunk.len();
-                    let xs_ref = &xs;
-                    unsafe {
-                        s.spawn(move || {
-                            linear_system.jacobi_step(start_row, end_row, xs_ref, chunk);
-                        });
-                    }
-                }
-            });
 
-            // PONG xs <- buffer
-            thread::scope(|s| {
-                for (i, chunk) in xs.chunks_mut(step_size).enumerate() {
-                    let start_row = i * step_size;
-                    let end_row = start_row + chunk.len();
-                    let xs_ref = &buffer;
+                    let xs_ref = &xs;
+                    let sys_ref = &linear_system;
+
                     unsafe {
                         s.spawn(move || {
-                            linear_system.jacobi_step(start_row, end_row, xs_ref, chunk);
+                            sys_ref.jacobi_step(start_row, end_row, xs_ref, chunk);
                         });
                     }
                 }
-            });
+            }); // Sync barrier
+
+            mem::swap(&mut xs, &mut buffer);
         }
 
         converged = classical_serial(&buffer, &xs);

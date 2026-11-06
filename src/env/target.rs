@@ -7,7 +7,7 @@ use std::fs;
 
 const TABLE_PATH: &'static str = "table";
 pub fn setup_ls() -> Option<LinearSystem> {
-    let mut args = env::args();
+    let args = env::args();
     let arg = env::args()
         .nth(1)
         .expect("missing matrix index");

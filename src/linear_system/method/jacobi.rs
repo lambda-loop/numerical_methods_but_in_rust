@@ -8,6 +8,7 @@ mod classical;
 mod delayed;
 mod galayed;
 mod gapped;
+mod gapped_even;
 
 pub use classical::method as classical;
 pub use delayed::method as delayed;
