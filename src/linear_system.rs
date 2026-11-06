@@ -24,21 +24,10 @@ impl LinearSystem {
     pub fn new(matrix_name: &str) -> Option<Self> {
         let mut as_path = Path::new(config::AS_PATH).join(matrix_name);
         as_path.set_extension("mtx");
-        let bs_path = Path::new(config::BS_PATH).join(matrix_name);
 
-        let as_content = fs::read_to_string(&as_path).ok()?;
-        // let as_content = fs::read_to_string(&as_path).unwrap_or_else(|err| {
-            // return None;
-            // panic!("Erro ao ler o arquivo A ({:?}): {err}", as_path);
-            // panic!("Erro ao ler o arquivo A ({:?}): {err}", as_path);
-        // });
+        let as_content = fs::read_to_string(as_path).ok()?;
 
-        let sas = read::extract_sas(&as_content)?;
-        let n = sas.len();
-
-        // let opt_bs_content = fs::read_to_string(&bs_path);
-        let sbs = read::handle_bs(bs_path, n);
-        Some(Self { sas, sbs, slen: n })
+        Self::from(matrix_name, &as_content)
     }
 
     pub fn from(matrix_name: &str, as_content: &str) -> Option<Self> {
