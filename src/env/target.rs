@@ -13,7 +13,7 @@ pub fn setup_ls() -> Option<LinearSystem> {
         .expect("missing matrix index");
 
     let (content, m_name)= get_matrix_content(&arg);
-    LinearSystem::from(&content, &m_name)
+    LinearSystem::from(&m_name, &content)
 }
 
 // 41 - "sherman1.mtx"
