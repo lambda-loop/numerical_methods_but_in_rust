@@ -37,14 +37,13 @@ pub fn get_matrix_name<'a> (arg: &str, input: &'a str) -> Option<MatrixTag<&'a s
                 .strip_prefix("LONG - ").expect("problem with table format")
                 .split_once(" - ").expect("problem with table format");
             if arg == clean {
-                let m_name = m_name.trim_matches('\"');
+                let (m_name, _) = m_name.split_once(".mtx\"").unwrap();
                 return Some(Long(m_name));
             }
         } else {
-            let (clean, m_name) = line
-                .split_once(" - ").expect("problem with table format");
+            let (clean, m_name) = line.split_once(" - \"").unwrap();
             if arg == clean {
-                let m_name = m_name.trim_matches('\"');
+                let (m_name, _) = m_name.split_once(".mtx\"").unwrap();
                 return Some(Fine(m_name));
             }
         }

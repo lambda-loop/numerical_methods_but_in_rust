@@ -10,9 +10,9 @@ use std::{
 }; 
 
 pub fn jaspiomz_with_serial_checkup(
-    n_iters: usize,
+    n_iters      : usize        ,
     linear_system: &LinearSystem,
-    num_threads: usize,
+    num_threads  : usize        ,
 ) -> (u64, Vec<f64>) {
     debug_assert!(n_iters != 0);
     let system_len = linear_system.slen;
