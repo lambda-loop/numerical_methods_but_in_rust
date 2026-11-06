@@ -59,12 +59,12 @@ fn get_matrix_content(arg: &str) -> (String, String) {
     let m_name = get_matrix_name(arg, &table).expect("line didnt found in the table");
     let (as_path, m_name) = match m_name {
         Long(m_name) => {
-            let m_path = format!("{LONG_AS_PATH}/{m_name}");
+            let m_path = format!("{LONG_AS_PATH}/{m_name}.mtx");
             (m_path, m_name)
         },
 
         Fine(m_name) => {
-            let m_path = format!("{AS_PATH}/{m_name}");
+            let m_path = format!("{AS_PATH}/{m_name}.mtx");
             (m_path, m_name)
         },
     };
