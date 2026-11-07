@@ -35,7 +35,7 @@ pub fn get_matrix_name<'a> (arg: &str, input: &'a str) -> Option<MatrixTag<&'a s
         if line.starts_with("LONG") {
             let (clean, m_name) = line
                 .strip_prefix("LONG - ").expect("problem with table format")
-                .split_once(" - ").expect("problem with table format");
+                .split_once(" - \"").expect("problem with table format");
             if arg == clean {
                 let (m_name, _) = m_name.split_once(".mtx\"").unwrap();
                 return Some(Long(m_name));
