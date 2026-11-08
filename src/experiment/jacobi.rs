@@ -1,14 +1,10 @@
 
 
 mod classical;
-mod delayed;
-mod galayed;
 mod gapped;
 
 pub use crate::linear_system::method::jacobi::{
     classical,
-    delayed,
-    galayed,
     gapped,
 };
 

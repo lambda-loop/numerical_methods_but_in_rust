@@ -1,19 +1,17 @@
 
 use super::{AS_PATH, LONG_AS_PATH};
+use crate::config::NUM_SHOTS;
 use crate::linear_system::LinearSystem;
 
 use std::env;
 use std::fs;
 
 const TABLE_PATH: &'static str = "table";
-pub fn setup_ls() -> Option<LinearSystem> {
-    let args = env::args();
-    let arg = env::args()
-        .nth(1)
-        .expect("missing matrix index");
-
-    let (content, m_name)= get_matrix_content(&arg);
-    LinearSystem::from(&m_name, &content)
+pub fn setup_ls() -> Option<(String, LinearSystem, usize)> {
+    let matrix_name = env::var("MATRIX_NAME").expect("missing MATRIX_NAME");
+    let (content, m_name, num_shots) = get_matrix_content(&matrix_name);
+    let linear_system = LinearSystem::from(&m_name, &content)?;
+    Some((m_name, linear_system, num_shots))
 }
 
 // 41 - "sherman1.mtx"
@@ -30,20 +28,20 @@ pub fn get_matrix_ext<'a> (line: &'a str) -> MatrixTag<&'a str> {
     }
 }
 
-pub fn get_matrix_name<'a> (arg: &str, input: &'a str) -> Option<MatrixTag<&'a str>> {
+pub fn get_matrix_name<'a> (matrix_name: &str, input: &'a str) -> Option<MatrixTag<&'a str>> {
     for line in input.lines() {
         if line.starts_with("LONG") {
-            let (clean, m_name) = line
+            let (_, m_name) = line
                 .strip_prefix("LONG - ").expect("problem with table format")
                 .split_once(" - \"").expect("problem with table format");
-            if arg == clean {
-                let (m_name, _) = m_name.split_once(".mtx\"").unwrap();
+            let (m_name, _) = m_name.split_once(".mtx\"").unwrap();
+            if matrix_name == m_name {
                 return Some(Long(m_name));
             }
         } else {
-            let (clean, m_name) = line.split_once(" - \"").unwrap();
-            if arg == clean {
-                let (m_name, _) = m_name.split_once(".mtx\"").unwrap();
+            let (_, m_name) = line.split_once(" - \"").unwrap();
+            let (m_name, _) = m_name.split_once(".mtx\"").unwrap();
+            if matrix_name == m_name {
                 return Some(Fine(m_name));
             }
         }
@@ -52,25 +50,25 @@ pub fn get_matrix_name<'a> (arg: &str, input: &'a str) -> Option<MatrixTag<&'a s
     None
 }
 
-fn get_matrix_content(arg: &str) -> (String, String) {
+fn get_matrix_content(matrix_name: &str) -> (String, String, usize) {
     let table =
         fs::read_to_string(TABLE_PATH)
             .expect("wrong table path");
-    let m_name = get_matrix_name(arg, &table).expect("line didnt found in the table");
-    let (as_path, m_name) = match m_name {
+    let m_name = get_matrix_name(matrix_name, &table).expect("line didnt found in the table");
+    let (as_path, m_name, num_shots) = match m_name {
         Long(m_name) => {
             let m_path = format!("{LONG_AS_PATH}/{m_name}.mtx");
-            (m_path, m_name)
+            (m_path, m_name, 3)
         },
 
         Fine(m_name) => {
             let m_path = format!("{AS_PATH}/{m_name}.mtx");
-            (m_path, m_name)
+            (m_path, m_name, NUM_SHOTS)
         },
     };
 
     let r#as = fs::read_to_string(&as_path).expect("matrix not found. What?");
-    (r#as, String::from(m_name))
+    (r#as, String::from(m_name), num_shots)
 }
 
 #[derive(Debug)]

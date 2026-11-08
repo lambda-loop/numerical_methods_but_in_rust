@@ -18,6 +18,8 @@ mod gap_in_even   ;
 mod gap_out_even  ;
 mod gap_mixed_even;
 
+pub use classical::method as classical;
+pub use gap_in_even::jaspiomz_with_serial_checkup as gap_in_even;
 pub use gap_out_even::method as gap_out_even;
 pub use gap_mixed_even::method as gap_mixed_even;
 

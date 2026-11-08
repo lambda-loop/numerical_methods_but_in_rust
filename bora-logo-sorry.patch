@@ -1,0 +1,365 @@
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..2b13b1b
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,52 @@
++# Numerical methods experiments
++
++Run commands from the repository root, with the existing `table` and matrix/B
++files available at the configured paths.
++
++`MATRIX_NAME` selects the matrix by its name without `.mtx`, for example
++`sherman1` or `494_bus`. The existing table marks `LONG` matrices and determines
++which A directory is used. A `LONG` matrix runs three repetitions; other
++matrices use `NUM_SHOTS` (currently ten).
++
++```bash
++cargo build --release --locked
++mkdir -p data/out
++MATRIX_NAME=sherman1 ./target/release/dumb-rematrix > results-sherman1.csv
++```
++
++## NPAD
++
++Build once, then submit one matrix per job from the repository root:
++
++```bash
++sbatch --export=ALL,MATRIX_NAME=sherman1 run_matrix.sbatch
++sbatch --export=ALL,MATRIX_NAME=494_bus run_matrix.sbatch
++```
++
++Pass partition, time and other allocation options to `sbatch` as appropriate
++for the intended job. The supplied script requests one task and 64 CPUs,
++matching the largest configured thread count. CSV output is saved as
++`results-<matrix>-<job-id>.csv`; solution files use the existing `data/out/`
++format.
++
++## Experiment grid
++
++Every repetition runs the configured thread counts and gaps for:
++
++- Jacobi: classical and even external gap.
++- Seidel: classical and even external gap.
++- JASPIoM: classical, internal gap, external gap and mixed gaps.
++
++Mixed JASPIoM uses the Cartesian product of `TESTING_GAPS` for its internal
++and external gaps. Experiments run sequentially, with parallelism inside each
++method. A and B are loaded once and shared across all runs for that matrix.
++The existing B lookup remains `data/bs/<matrix-name>`, without `.mtx`.
++
++With the current configuration, each repetition has 174 runs: 1,740 runs for
++a regular matrix and 522 for a `LONG` matrix.
++
++The CSV preserves the existing columns and appends `Shot`, `Gap In` and
++`Gap Out`. The original `Gap` column contains the internal gap for internal-only
++JASPIoM, and the external gap for external/mixed variants. Iteration counts
++retain each method's current convention. Timing covers the solver call;
++residual calculation and output happen afterward.
+diff --git a/run_matrix.sbatch b/run_matrix.sbatch
+new file mode 100644
+index 0000000..83133b3
+--- /dev/null
++++ b/run_matrix.sbatch
+@@ -0,0 +1,11 @@
++#!/usr/bin/env bash
++#SBATCH --job-name=numerical-methods
++#SBATCH --nodes=1
++#SBATCH --ntasks=1
++#SBATCH --cpus-per-task=64
++#SBATCH --output=slurm-%x-%j.log
++
++set -e
++
++mkdir -p data/out
++srun ./target/release/dumb-rematrix > "results-${MATRIX_NAME}-${SLURM_JOB_ID}.csv"
+diff --git a/src/env/target.rs b/src/env/target.rs
+index 083b94e..ba9df78 100644
+--- a/src/env/target.rs
++++ b/src/env/target.rs
+@@ -1,19 +1,17 @@
+ 
+ use super::{AS_PATH, LONG_AS_PATH};
++use crate::config::NUM_SHOTS;
+ use crate::linear_system::LinearSystem;
+ 
+ use std::env;
+ use std::fs;
+ 
+ const TABLE_PATH: &'static str = "table";
+-pub fn setup_ls() -> Option<LinearSystem> {
+-    let args = env::args();
+-    let arg = env::args()
+-        .nth(1)
+-        .expect("missing matrix index");
+-
+-    let (content, m_name)= get_matrix_content(&arg);
+-    LinearSystem::from(&m_name, &content)
++pub fn setup_ls() -> Option<(String, LinearSystem, usize)> {
++    let matrix_name = env::var("MATRIX_NAME").expect("missing MATRIX_NAME");
++    let (content, m_name, num_shots) = get_matrix_content(&matrix_name);
++    let linear_system = LinearSystem::from(&m_name, &content)?;
++    Some((m_name, linear_system, num_shots))
+ }
+ 
+ // 41 - "sherman1.mtx"
+@@ -30,20 +28,20 @@ pub fn get_matrix_ext<'a> (line: &'a str) -> MatrixTag<&'a str> {
+     }
+ }
+ 
+-pub fn get_matrix_name<'a> (arg: &str, input: &'a str) -> Option<MatrixTag<&'a str>> {
++pub fn get_matrix_name<'a> (matrix_name: &str, input: &'a str) -> Option<MatrixTag<&'a str>> {
+     for line in input.lines() {
+         if line.starts_with("LONG") {
+-            let (clean, m_name) = line
++            let (_, m_name) = line
+                 .strip_prefix("LONG - ").expect("problem with table format")
+                 .split_once(" - \"").expect("problem with table format");
+-            if arg == clean {
+-                let (m_name, _) = m_name.split_once(".mtx\"").unwrap();
++            let (m_name, _) = m_name.split_once(".mtx\"").unwrap();
++            if matrix_name == m_name {
+                 return Some(Long(m_name));
+             }
+         } else {
+-            let (clean, m_name) = line.split_once(" - \"").unwrap();
+-            if arg == clean {
+-                let (m_name, _) = m_name.split_once(".mtx\"").unwrap();
++            let (_, m_name) = line.split_once(" - \"").unwrap();
++            let (m_name, _) = m_name.split_once(".mtx\"").unwrap();
++            if matrix_name == m_name {
+                 return Some(Fine(m_name));
+             }
+         }
+@@ -52,25 +50,25 @@ pub fn get_matrix_name<'a> (arg: &str, input: &'a str) -> Option<MatrixTag<&'a s
+     None
+ }
+ 
+-fn get_matrix_content(arg: &str) -> (String, String) {
++fn get_matrix_content(matrix_name: &str) -> (String, String, usize) {
+     let table =
+         fs::read_to_string(TABLE_PATH)
+             .expect("wrong table path");
+-    let m_name = get_matrix_name(arg, &table).expect("line didnt found in the table");
+-    let (as_path, m_name) = match m_name {
++    let m_name = get_matrix_name(matrix_name, &table).expect("line didnt found in the table");
++    let (as_path, m_name, num_shots) = match m_name {
+         Long(m_name) => {
+             let m_path = format!("{LONG_AS_PATH}/{m_name}.mtx");
+-            (m_path, m_name)
++            (m_path, m_name, 3)
+         },
+ 
+         Fine(m_name) => {
+             let m_path = format!("{AS_PATH}/{m_name}.mtx");
+-            (m_path, m_name)
++            (m_path, m_name, NUM_SHOTS)
+         },
+     };
+ 
+     let r#as = fs::read_to_string(&as_path).expect("matrix not found. What?");
+-    (r#as, String::from(m_name))
++    (r#as, String::from(m_name), num_shots)
+ }
+ 
+ #[derive(Debug)]
+diff --git a/src/experiment.rs b/src/experiment.rs
+index c81557f..88a0e83 100644
+--- a/src/experiment.rs
++++ b/src/experiment.rs
+@@ -5,6 +5,7 @@
+ // pub mod jaspiomz;
+ 
+ pub mod jacobi;
++pub mod single;
+ 
+ use std::time::Duration;
+ 
+diff --git a/src/experiment/jacobi.rs b/src/experiment/jacobi.rs
+index bbf7eb8..865fc1e 100644
+--- a/src/experiment/jacobi.rs
++++ b/src/experiment/jacobi.rs
+@@ -1,14 +1,10 @@
+ 
+ 
+ mod classical;
+-mod delayed;
+-mod galayed;
+ mod gapped;
+ 
+ pub use crate::linear_system::method::jacobi::{
+     classical,
+-    delayed,
+-    galayed,
+     gapped,
+ };
+ 
+diff --git a/src/experiment/single.rs b/src/experiment/single.rs
+new file mode 100644
+index 0000000..9c711e1
+--- /dev/null
++++ b/src/experiment/single.rs
+@@ -0,0 +1,107 @@
++use super::{ExperimentResult, Metadata, PerformanceAndQuality, ProblemSolutionConfig};
++use crate::config::{TESTING_GAPS, TESTING_THREADS};
++use crate::linear_system::{method::{jacobi, jaspiom, seidel}, LinearSystem};
++use std::time::Instant;
++
++pub fn run(matrix_name: &str, linear_system: &LinearSystem, num_shots: usize) {
++    let mut id = 0_u64;
++
++    for shot in 1..=num_shots {
++        for num_threads in TESTING_THREADS {
++            run_one(matrix_name, linear_system, &mut id, shot,
++                "jacobi_classical", (num_threads, 1, 1),
++                || jacobi::classical(linear_system, num_threads));
++        }
++        for gap in TESTING_GAPS {
++            for num_threads in TESTING_THREADS {
++                run_one(matrix_name, linear_system, &mut id, shot,
++                    "jacobi_gap_even", (num_threads, 1, gap as usize),
++                    || jacobi::gapped(linear_system, num_threads, gap));
++            }
++        }
++
++        run_one(matrix_name, linear_system, &mut id, shot,
++            "seidel_classical", (1, 1, 1),
++            || seidel::classical(linear_system));
++        for gap in TESTING_GAPS {
++            run_one(matrix_name, linear_system, &mut id, shot,
++                "seidel_gap_even", (1, 1, gap as usize),
++                || seidel::gap_even(linear_system, gap));
++        }
++
++        for num_threads in TESTING_THREADS {
++            run_one(matrix_name, linear_system, &mut id, shot,
++                "jaspiom_classical", (num_threads, 1, 1),
++                || jaspiom::classical(linear_system, num_threads));
++        }
++        for gap_in in TESTING_GAPS {
++            for num_threads in TESTING_THREADS {
++                run_one(matrix_name, linear_system, &mut id, shot,
++                    "jaspiom_gap_in_even", (num_threads, gap_in as usize, 1),
++                    || jaspiom::gap_in_even(gap_in as usize, linear_system, num_threads));
++            }
++        }
++        for gap_out in TESTING_GAPS {
++            for num_threads in TESTING_THREADS {
++                run_one(matrix_name, linear_system, &mut id, shot,
++                    "jaspiom_gap_out_even", (num_threads, 1, gap_out as usize),
++                    || jaspiom::gap_out_even(linear_system, num_threads, gap_out));
++            }
++        }
++        for gap_in in TESTING_GAPS {
++            for gap_out in TESTING_GAPS {
++                for num_threads in TESTING_THREADS {
++                    run_one(matrix_name, linear_system, &mut id, shot,
++                        "jaspiom_gap_mixed_even",
++                        (num_threads, gap_in as usize, gap_out as usize),
++                        || jaspiom::gap_mixed_even(
++                            gap_in as usize, linear_system, num_threads, gap_out));
++                }
++            }
++        }
++    }
++}
++
++fn run_one(
++    matrix_name: &str,
++    linear_system: &LinearSystem,
++    id: &mut u64,
++    shot: usize,
++    algorithm_name: &str,
++    (num_threads, gap_in, gap_out): (usize, usize, usize),
++    solve: impl FnOnce() -> (u64, Vec<f64>),
++) {
++    let now = Instant::now();
++    let (num_iterations, final_result) = solve();
++    let time_spent = now.elapsed();
++
++    let final_residual = linear_system.calculate_residual(&final_result);
++    let performance_and_quality = PerformanceAndQuality {
++        num_iterations,
++        time_spent,
++        final_result,
++        final_residual,
++        converged: true,
++    };
++    performance_and_quality.register_result(
++        &format!("{matrix_name}-{algorithm_name}"), *id);
++
++    let result = ExperimentResult {
++        metadata: Metadata {
++            id: *id,
++            algorithm_name: String::from(algorithm_name),
++            file_name: String::from(matrix_name),
++        },
++        problem_solution_config: ProblemSolutionConfig {
++            len: linear_system.slen,
++            num_threads,
++            num_threads_c: 1,
++            gap: if gap_out == 1 { gap_in } else { gap_out },
++            delayed: 1,
++            sparsed: false,
++        },
++        performance_and_quality,
++    };
++    println!("{},{shot},{gap_in},{gap_out}", result.to_csv());
++    *id += 1;
++}
+diff --git a/src/linear_system/method/jacobi.rs b/src/linear_system/method/jacobi.rs
+index fda7d4e..4047bb7 100644
+--- a/src/linear_system/method/jacobi.rs
++++ b/src/linear_system/method/jacobi.rs
+@@ -8,7 +8,7 @@ mod classical;
+ mod gapped_even;
+ 
+ pub use classical::method as classical;
+-pub use gapped::method as gapped;
++pub use gapped_even::method as gapped;
+ 
+ 
+ 
+diff --git a/src/linear_system/method/jaspiom.rs b/src/linear_system/method/jaspiom.rs
+index 897bbd1..c399409 100644
+--- a/src/linear_system/method/jaspiom.rs
++++ b/src/linear_system/method/jaspiom.rs
+@@ -18,6 +18,8 @@ mod gap_in_even   ;
+ mod gap_out_even  ;
+ mod gap_mixed_even;
+ 
++pub use classical::method as classical;
++pub use gap_in_even::jaspiomz_with_serial_checkup as gap_in_even;
+ pub use gap_out_even::method as gap_out_even;
+ pub use gap_mixed_even::method as gap_mixed_even;
+ 
+diff --git a/src/linear_system/method/seidel.rs b/src/linear_system/method/seidel.rs
+index d0e470f..1076762 100644
+--- a/src/linear_system/method/seidel.rs
++++ b/src/linear_system/method/seidel.rs
+@@ -1,5 +1,7 @@
+ 
+ 
+ mod classical;
+-mod gap;
+ mod gap_even;
++
++pub use classical::method as classical;
++pub use gap_even::method as gap_even;
+diff --git a/src/main.rs b/src/main.rs
+index d91300f..2baacbe 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -26,8 +26,10 @@ pub fn main() {
+     // let dir = std::fs::read_dir(".").expect("valid dir path");
+     // let mut file = std::fs::File::create("table").expect("hun");
+     // writeln!(file, "{table}").unwrap();
+-    let opt_ls = env::target::setup_ls();
+-    println!("{opt_ls:?}")
++    let (matrix_name, linear_system, num_shots) =
++        env::target::setup_ls().expect("problem with matrix");
++    println!("{},Shot,Gap In,Gap Out", experiment::ExperimentResult::HEADER);
++    experiment::single::run(&matrix_name, &linear_system, num_shots);
+ }
+ /*
+ pub fn main() {

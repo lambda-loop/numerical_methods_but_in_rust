@@ -8,7 +8,7 @@ mod classical;
 mod gapped_even;
 
 pub use classical::method as classical;
-pub use gapped::method as gapped;
+pub use gapped_even::method as gapped;
 
 
 

@@ -26,8 +26,10 @@ pub fn main() {
     // let dir = std::fs::read_dir(".").expect("valid dir path");
     // let mut file = std::fs::File::create("table").expect("hun");
     // writeln!(file, "{table}").unwrap();
-    let opt_ls = env::target::setup_ls();
-    println!("{opt_ls:?}")
+    let (matrix_name, linear_system, num_shots) =
+        env::target::setup_ls().expect("problem with matrix");
+    println!("{},Shot,Gap In,Gap Out", experiment::ExperimentResult::HEADER);
+    experiment::single::run(&matrix_name, &linear_system, num_shots);
 }
 /*
 pub fn main() {

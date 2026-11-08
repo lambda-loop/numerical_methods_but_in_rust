@@ -5,6 +5,7 @@
 // pub mod jaspiomz;
 
 pub mod jacobi;
+pub mod single;
 
 use std::time::Duration;
 
