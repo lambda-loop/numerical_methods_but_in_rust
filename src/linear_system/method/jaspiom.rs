@@ -17,3 +17,7 @@ mod classical     ;
 mod gap_in_even   ;
 mod gap_out_even  ;
 mod gap_mixed_even;
+
+pub use gap_out_even::method as gap_out_even;
+pub use gap_mixed_even::method as gap_mixed_even;
+
